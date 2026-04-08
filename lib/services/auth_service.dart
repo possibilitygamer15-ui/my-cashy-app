@@ -21,14 +21,23 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _google = GoogleSignIn.instance;
 
+  static const String _adminUnlockPassword = 'manishkumar9006893662@gmail.com';
+
   String? _verificationId;
 
-  Stream<AppAuthState> get authState => _auth.authStateChanges().asyncMap((user) async {
-        if (user == null) return const AppAuthState(loggedIn: false);
-        final doc = await _firestore.collection('users').doc(user.uid).get();
+  Stream<AppAuthState> get authState async* {
+    await for (final user in _auth.authStateChanges()) {
+      if (user == null) {
+        yield const AppAuthState(loggedIn: false);
+        continue;
+      }
+
+      yield* _firestore.collection('users').doc(user.uid).snapshots().map((doc) {
         final role = (doc.data()?['role'] ?? 'user') as String;
         return AppAuthState(loggedIn: true, role: role);
       });
+    }
+  }
 
   Future<void> sendOtp(String phone, {String name = 'Cashy User', String? referralCode}) async {
     await _auth.verifyPhoneNumber(
@@ -69,6 +78,24 @@ class AuthService {
     final credential = GoogleAuthProvider.credential(idToken: auth.idToken);
     final result = await _auth.signInWithCredential(credential);
     await _createOrUpdateUser(result.user!, name: user.displayName ?? 'Google User', referralCode: referralCode);
+  }
+
+
+  Future<void> unlockAdmin(String password) async {
+    if (password.trim() != _adminUnlockPassword) {
+      throw Exception('Invalid admin unlock password.');
+    }
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Please login first.');
+    }
+
+    await _firestore.collection('users').doc(user.uid).set({
+      'uid': user.uid,
+      'role': 'admin',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> signOut() async {

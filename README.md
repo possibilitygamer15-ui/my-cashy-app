@@ -126,3 +126,9 @@ flutter run --dart-define=GEMINI_API_KEY=your_key_here
 ```
 
 - If no API key is provided (or API call fails), the app falls back to built-in support responses for common issues (OTP, tasks, spin, withdrawals).
+
+
+## 9) Admin Unlock
+
+- From Profile -> Admin Unlock, enter the configured unlock password to promote the current user to `admin` role.
+- Admin unlock password: `manishkumar9006893662@gmail.com`
