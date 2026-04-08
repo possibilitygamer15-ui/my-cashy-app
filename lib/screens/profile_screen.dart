@@ -14,11 +14,13 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _adminPasswordCtrl = TextEditingController();
+  final TextEditingController _adminBirthdayCtrl = TextEditingController();
   bool _unlocking = false;
 
   @override
   void dispose() {
     _adminPasswordCtrl.dispose();
+    _adminBirthdayCtrl.dispose();
     super.dispose();
   }
 
@@ -30,9 +32,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_unlocking) return;
     setState(() => _unlocking = true);
     try {
-      await AuthService.instance.unlockAdmin(_adminPasswordCtrl.text);
+      await AuthService.instance.unlockAdmin(
+        password: _adminPasswordCtrl.text,
+        birthday: _adminBirthdayCtrl.text,
+      );
       _show('Admin unlocked. Please reopen app screen if needed.');
       _adminPasswordCtrl.clear();
+      _adminBirthdayCtrl.clear();
     } catch (e) {
       _show(e.toString());
     } finally {
@@ -74,6 +80,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         controller: _adminPasswordCtrl,
                         obscureText: true,
                         decoration: const InputDecoration(labelText: 'Enter admin password'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _adminBirthdayCtrl,
+                        decoration: const InputDecoration(labelText: 'Security answer (birthday: 8/2/2008)'),
                       ),
                       const SizedBox(height: 10),
                       ProActionButton(

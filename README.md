@@ -130,5 +130,6 @@ flutter run --dart-define=GEMINI_API_KEY=your_key_here
 
 ## 9) Admin Unlock
 
-- From Profile -> Admin Unlock, enter the configured unlock password to promote the current user to `admin` role.
+- From Profile -> Admin Unlock, enter both security checks to promote the current user to `admin` role.
 - Admin unlock password: `manishkumar9006893662@gmail.com`
+- Security birthday answer: `8/2/2008`

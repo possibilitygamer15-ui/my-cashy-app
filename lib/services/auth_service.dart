@@ -22,6 +22,7 @@ class AuthService {
   final GoogleSignIn _google = GoogleSignIn.instance;
 
   static const String _adminUnlockPassword = 'manishkumar9006893662@gmail.com';
+  static const String _adminUnlockBirthday = '8/2/2008';
 
   String? _verificationId;
 
@@ -81,9 +82,15 @@ class AuthService {
   }
 
 
-  Future<void> unlockAdmin(String password) async {
+
+  Future<void> unlockAdmin({required String password, required String birthday}) async {
     if (password.trim() != _adminUnlockPassword) {
       throw Exception('Invalid admin unlock password.');
+    }
+
+    final normalizedBirthday = birthday.trim().replaceAll('-', '/').replaceAll(' ', '');
+    if (normalizedBirthday != _adminUnlockBirthday) {
+      throw Exception('Invalid admin birthday answer.');
     }
 
     final user = _auth.currentUser;
