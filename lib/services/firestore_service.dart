@@ -99,17 +99,35 @@ class FirestoreService {
   Future<int> spinReward() async {
     final nowDate = DateTime.now().toIso8601String().split('T').first;
     final user = await _userRef.get();
-    final last = (user.data()?['lastSpinDate'] ?? '') as String;
+    final userData = user.data() ?? {};
+    final last = (userData['lastSpinDate'] ?? '') as String;
     if (last == nowDate) throw Exception('Daily spin already used.');
+
+    final coins = (userData['coins'] ?? 0) as int;
+    const spinCost = 10;
+    if (coins < spinCost) {
+      throw Exception('Need at least $spinCost coins to spin.');
+    }
 
     final reward = [5, 10, 15, 20, 25, 30, 50][Random().nextInt(7)];
     await _db.runTransaction((tx) async {
-      tx.update(_userRef, {'lastSpinDate': nowDate, 'coins': FieldValue.increment(reward)});
+      tx.update(_userRef, {
+        'lastSpinDate': nowDate,
+        'coins': FieldValue.increment(reward - spinCost),
+      });
       tx.set(_db.collection('transactions').doc(), {
         'uid': _uid,
         'type': 'coin_reward',
         'amount': reward,
-        'description': 'Daily spin reward',
+        'description': 'Daily spin reward (cost: $spinCost coins)',
+        'status': 'success',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+      tx.set(_db.collection('transactions').doc(), {
+        'uid': _uid,
+        'type': 'debit',
+        'amount': spinCost,
+        'description': 'Spin wheel entry fee',
         'status': 'success',
         'timestamp': DateTime.now().toIso8601String(),
       });

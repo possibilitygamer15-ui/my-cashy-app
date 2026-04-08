@@ -37,7 +37,7 @@ class _EarnScreenState extends State<EarnScreen> {
   Future<void> _spin() async {
     try {
       final reward = await FirestoreService.instance.spinReward();
-      _show('You won $reward coins');
+      _show('You won $reward coins (10 coin spin fee applied)');
     } catch (e) {
       _show(e.toString());
     }
@@ -92,7 +92,7 @@ class _EarnScreenState extends State<EarnScreen> {
           Card(
             child: ListTile(
               title: const Text('Daily Spin Wheel'),
-              subtitle: const Text('One spin daily, win 5-50 coins'),
+              subtitle: const Text('One spin daily (cost 10 coins), win 5-50 coins'),
               trailing: ElevatedButton(onPressed: _spin, child: const Text('Spin')),
             ),
           ),

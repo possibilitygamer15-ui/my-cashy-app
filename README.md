@@ -90,7 +90,7 @@ service cloud.firestore {
 
 - OTP + Google authentication.
 - Referral rewards for both new and invited user.
-- Daily spin wheel (one spin/day) with 5–50 coin range.
+- Daily spin wheel (one spin/day) with 10 coin entry fee and 5–50 coin reward range.
 - Scratch card with 25% payout probability.
 - Task validation timer (8 seconds) before reward claim.
 - Anti-abuse checks:
