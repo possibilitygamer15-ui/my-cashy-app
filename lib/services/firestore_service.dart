@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/refer_app_item.dart';
 import '../models/task_item.dart';
 
 class FirestoreService {
@@ -26,6 +27,15 @@ class FirestoreService {
         .map((snap) => snap.docs.map((e) => TaskItem.fromMap(e.id, e.data())).toList());
   }
 
+
+  Stream<List<ReferAppItem>> watchReferApps() {
+    return _db
+        .collection('referApps')
+        .where('isActive', isEqualTo: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((e) => ReferAppItem.fromMap(e.id, e.data())).toList());
+  }
+
   Stream<QuerySnapshot<Map<String, dynamic>>> watchTransactions() {
     return _db
         .collection('transactions')
@@ -38,11 +48,11 @@ class FirestoreService {
     await _db.runTransaction((tx) async {
       final snap = await tx.get(_userRef);
       final coins = (snap.data()?['coins'] ?? 0) as int;
-      if (coins < 100) {
-        throw Exception('Minimum 100 coins needed');
+      if (coins < 150) {
+        throw Exception('Minimum 150 Lulu coins needed');
       }
-      final convertCoins = (coins ~/ 100) * 100;
-      final amount = (convertCoins / 100) * 10;
+      final convertCoins = (coins ~/ 150) * 150;
+      final amount = (convertCoins / 150) * 10;
       tx.update(_userRef, {
         'coins': FieldValue.increment(-convertCoins),
         'balance': FieldValue.increment(amount),
@@ -51,7 +61,7 @@ class FirestoreService {
         'uid': _uid,
         'type': 'credit',
         'amount': amount,
-        'description': 'Coins converted to balance',
+        'description': 'Lulu coins converted to balance',
         'status': 'success',
         'timestamp': DateTime.now().toIso8601String(),
       });
@@ -74,12 +84,13 @@ class FirestoreService {
 
   Future<void> completeTask(TaskItem task) async {
     final proofRef = _db.collection('users').doc(_uid).collection('taskProofs').doc(task.id);
-    final proofSnap = await proofRef.get();
-    if (proofSnap.exists) {
-      throw Exception('Task already completed.');
-    }
 
     await _db.runTransaction((tx) async {
+      final proofSnap = await tx.get(proofRef);
+      if (proofSnap.exists) {
+        throw Exception('Task already completed.');
+      }
+
       tx.set(proofRef, {
         'taskId': task.id,
         'completedAt': DateTime.now().toIso8601String(),
@@ -98,19 +109,21 @@ class FirestoreService {
 
   Future<int> spinReward() async {
     final nowDate = DateTime.now().toIso8601String().split('T').first;
-    final user = await _userRef.get();
-    final userData = user.data() ?? {};
-    final last = (userData['lastSpinDate'] ?? '') as String;
-    if (last == nowDate) throw Exception('Daily spin already used.');
-
-    final coins = (userData['coins'] ?? 0) as int;
     const spinCost = 10;
-    if (coins < spinCost) {
-      throw Exception('Need at least $spinCost coins to spin.');
-    }
+    int reward = 0;
 
-    final reward = [5, 10, 15, 20, 25, 30, 50][Random().nextInt(7)];
     await _db.runTransaction((tx) async {
+      final userSnap = await tx.get(_userRef);
+      final userData = userSnap.data() ?? {};
+      final last = (userData['lastSpinDate'] ?? '') as String;
+      if (last == nowDate) throw Exception('Daily spin already used.');
+
+      final coins = (userData['coins'] ?? 0) as int;
+      if (coins < spinCost) {
+        throw Exception('Need at least $spinCost coins to spin.');
+      }
+
+      reward = [5, 10, 15, 20, 25, 30, 50][Random().nextInt(7)];
       tx.update(_userRef, {
         'lastSpinDate': nowDate,
         'coins': FieldValue.increment(reward - spinCost),
@@ -133,6 +146,34 @@ class FirestoreService {
       });
     });
     return reward;
+  }
+
+
+  Future<void> claimReferAppInstall(ReferAppItem app) async {
+    final proofRef = _db.collection('users').doc(_uid).collection('appReferrals').doc(app.id);
+
+    await _db.runTransaction((tx) async {
+      final proofSnap = await tx.get(proofRef);
+      if (proofSnap.exists) {
+        throw Exception('Commission already claimed for this app.');
+      }
+
+      tx.set(proofRef, {
+        'appId': app.id,
+        'claimedAt': DateTime.now().toIso8601String(),
+        'commissionCoins': app.commissionCoins,
+      });
+
+      tx.update(_userRef, {'coins': FieldValue.increment(app.commissionCoins)});
+      tx.set(_db.collection('transactions').doc(), {
+        'uid': _uid,
+        'type': 'coin_reward',
+        'amount': app.commissionCoins,
+        'description': 'Refer app commission: ${app.name}',
+        'status': 'success',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    });
   }
 
   Future<int> scratchReward() async {

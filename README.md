@@ -1,6 +1,6 @@
 # CashyPro (Flutter + Firebase)
 
-Professional Android earning app with OTP/Google login, rewarded ads, tasks, spin, scratch, wallet, withdrawals, referral, and admin panel.
+Professional Android earning app with OTP/Google login, rewarded ads, tasks, spin, scratch, wallet, withdrawals, referral, admin panel, and AI support chat. Default coin branding is **Lulu Coin** with a black buffalo-style coin badge.
 
 ## 1) Setup
 
@@ -40,6 +40,10 @@ Professional Android earning app with OTP/Google login, rewarded ads, tasks, spi
   - uid, type, amount, description, status, timestamp
 - `withdrawals/{id}`
   - uid, amount, upiId, status, createdAt
+- `referApps/{id}`
+  - name, link, commissionCoins, isActive
+- `users/{uid}/appReferrals/{appId}`
+  - appId, commissionCoins, claimedAt
 
 ## 4) Security Rules (starter)
 
@@ -92,13 +96,14 @@ service cloud.firestore {
 - Referral rewards for both new and invited user.
 - Daily spin wheel (one spin/day) with 10 coin entry fee and 5–50 coin reward range.
 - Scratch card with 25% payout probability.
+- Refer app install commission claims (one claim per listed app).
 - Task validation timer (8 seconds) before reward claim.
 - Anti-abuse checks:
   - Daily ad cap
   - One-time task completion
   - One spin/day
 - Wallet:
-  - 100 coins = ₹10 conversion
+  - 150 Lulu coins = ₹10 conversion
   - Withdrawal minimum ₹50
   - Pending/Approved/Rejected state
 - Admin:
@@ -113,3 +118,23 @@ flutter build appbundle --release
 ```
 
 Upload AAB to Play Console internal testing, then production rollout.
+
+
+## 8) AI Support Chat
+
+- New in-app support chat is available from the bottom navigation `Support` tab.
+- Chat history is stored in Firestore at `users/{uid}/supportChats/primary/messages`.
+- To enable Gemini responses, pass an API key at build/run time:
+
+```bash
+flutter run --dart-define=GEMINI_API_KEY=your_key_here
+```
+
+- If no API key is provided (or API call fails), the app falls back to built-in support responses for common issues (OTP, tasks, spin, withdrawals).
+
+
+## 9) Admin Unlock
+
+- From Profile -> Admin Unlock, enter both security checks to promote the current user to `admin` role.
+- Admin unlock password: `manishkumar9006893662@gmail.com`
+- Security birthday answer: `8/2/2008`

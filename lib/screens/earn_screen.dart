@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../models/refer_app_item.dart';
 import '../models/task_item.dart';
 import '../services/ad_service.dart';
 import '../services/firestore_service.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../widgets/pro_action_button.dart';
 
 class EarnScreen extends StatefulWidget {
   const EarnScreen({super.key});
@@ -29,7 +31,7 @@ class _EarnScreenState extends State<EarnScreen> {
       onError: _show,
       onReward: () {
         setState(() => scratchUnlocked = true);
-        _show('Ad reward credited + scratch unlocked');
+        _show('Lulu reward credited + scratch unlocked');
       },
     );
   }
@@ -37,7 +39,7 @@ class _EarnScreenState extends State<EarnScreen> {
   Future<void> _spin() async {
     try {
       final reward = await FirestoreService.instance.spinReward();
-      _show('You won $reward coins (10 coin spin fee applied)');
+      _show('You won $reward Lulu coins (10 coin spin fee applied)');
     } catch (e) {
       _show(e.toString());
     }
@@ -50,7 +52,7 @@ class _EarnScreenState extends State<EarnScreen> {
     }
     final reward = await FirestoreService.instance.scratchReward();
     setState(() => scratchUnlocked = false);
-    _show(reward > 0 ? 'Scratch reward: $reward coins' : 'Better luck next time');
+    _show(reward > 0 ? 'Scratch reward: $reward Lulu coins' : 'Better luck next time');
   }
 
   Future<void> _startTask(TaskItem task) async {
@@ -64,7 +66,24 @@ class _EarnScreenState extends State<EarnScreen> {
     try {
       await FirestoreService.instance.completeTask(task);
       setState(() => scratchUnlocked = true);
-      _show('Task completed. ${task.rewardCoins} coins added');
+      _show('Task completed. ${task.rewardCoins} Lulu coins added');
+    } catch (e) {
+      _show(e.toString());
+    }
+  }
+
+  Future<void> _startReferApp(ReferAppItem app) async {
+    final uri = Uri.parse(app.link);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      _show('Unable to open app link');
+      return;
+    }
+
+    _show('Install and keep app open for 8 seconds to claim commission...');
+    await Future<void>.delayed(const Duration(seconds: 8));
+    try {
+      await FirestoreService.instance.claimReferAppInstall(app);
+      _show('Refer commission credited: ${app.commissionCoins} Lulu coins');
     } catch (e) {
       _show(e.toString());
     }
@@ -78,33 +97,83 @@ class _EarnScreenState extends State<EarnScreen> {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
-      appBar: AppBar(title: const Text('Earn Coins')),
+      appBar: AppBar(title: const Text('Earn Lulu Coins')),
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: ListTile(
-              title: const Text('Rewarded Ad (+20 coins)'),
-              subtitle: const Text('Maximum 10 ads/day'),
-              trailing: ElevatedButton(onPressed: _watchAd, child: const Text('Watch')),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.16),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Text(
+              'Complete quick actions to earn Lulu coins faster. Rewards are credited instantly after verification.',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              title: const Text('Rewarded Ad (+20 Lulu)'),
+              subtitle: const Text('Maximum 10 ads/day'),
+              trailing: ProActionButton(label: 'Watch', icon: Icons.ondemand_video, onPressed: _watchAd),
+            ),
+          ),
+          const SizedBox(height: 8),
           Card(
             child: ListTile(
               title: const Text('Daily Spin Wheel'),
-              subtitle: const Text('One spin daily (cost 10 coins), win 5-50 coins'),
-              trailing: ElevatedButton(onPressed: _spin, child: const Text('Spin')),
+              subtitle: const Text('One spin daily (cost 10 Lulu), win 5-50 Lulu'),
+              trailing: ProActionButton(label: 'Spin', icon: Icons.casino, onPressed: _spin),
             ),
           ),
+          const SizedBox(height: 8),
           Card(
             child: ListTile(
               title: const Text('Scratch Card'),
               subtitle: const Text('25% payout chance'),
-              trailing: ElevatedButton(onPressed: _scratch, child: const Text('Scratch')),
+              trailing: ProActionButton(label: 'Scratch', icon: Icons.style, onPressed: _scratch),
             ),
           ),
+          const SizedBox(height: 12),
+          Text('Refer Apps', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Text('Tasks', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+          StreamBuilder<List<ReferAppItem>>(
+            stream: FirestoreService.instance.watchReferApps(),
+            builder: (context, snapshot) {
+              final apps = snapshot.data ?? [];
+              if (apps.isEmpty) {
+                return const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('No refer apps available now'),
+                  ),
+                );
+              }
+
+              return Column(
+                children: apps
+                    .map((app) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Card(
+                            child: ListTile(
+                              title: Text(app.name),
+                              subtitle: Text('Install via link and earn ${app.commissionCoins} Lulu commission'),
+                              trailing: ProActionButton(
+                                label: 'Install',
+                                icon: Icons.download,
+                                onPressed: () => unawaited(_startReferApp(app)),
+                              ),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          Text('Tasks', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           StreamBuilder<List<TaskItem>>(
             stream: FirestoreService.instance.watchTasks(),
@@ -115,13 +184,17 @@ class _EarnScreenState extends State<EarnScreen> {
               }
               return Column(
                 children: tasks
-                    .map((task) => Card(
-                          child: ListTile(
-                            title: Text(task.title),
-                            subtitle: Text('Reward: ${task.rewardCoins} coins | 8 sec validation'),
-                            trailing: ElevatedButton(
-                              onPressed: () => unawaited(_startTask(task)),
-                              child: const Text('Start'),
+                    .map((task) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Card(
+                            child: ListTile(
+                              title: Text(task.title),
+                              subtitle: Text('Reward: ${task.rewardCoins} Lulu | 8 sec validation'),
+                              trailing: ProActionButton(
+                                label: 'Start',
+                                icon: Icons.play_arrow,
+                                onPressed: () => unawaited(_startTask(task)),
+                              ),
                             ),
                           ),
                         ))
@@ -133,4 +206,5 @@ class _EarnScreenState extends State<EarnScreen> {
       ),
     );
   }
+
 }

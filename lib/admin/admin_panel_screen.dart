@@ -13,6 +13,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final _linkCtrl = TextEditingController();
   final _rewardCtrl = TextEditingController();
 
+  final _referNameCtrl = TextEditingController();
+  final _referLinkCtrl = TextEditingController();
+  final _referCommissionCtrl = TextEditingController();
+
   final _db = FirebaseFirestore.instance;
 
   Future<void> _addTask() async {
@@ -26,6 +30,19 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     _titleCtrl.clear();
     _linkCtrl.clear();
     _rewardCtrl.clear();
+  }
+
+  Future<void> _addReferApp() async {
+    await _db.collection('referApps').add({
+      'name': _referNameCtrl.text.trim(),
+      'link': _referLinkCtrl.text.trim(),
+      'commissionCoins': int.parse(_referCommissionCtrl.text.trim()),
+      'isActive': true,
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+    _referNameCtrl.clear();
+    _referLinkCtrl.clear();
+    _referCommissionCtrl.clear();
   }
 
   Future<void> _updateWithdrawal(String id, String status) async {
@@ -44,6 +61,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           TextField(controller: _linkCtrl, decoration: const InputDecoration(labelText: 'Link')),
           TextField(controller: _rewardCtrl, decoration: const InputDecoration(labelText: 'Reward coins')),
           ElevatedButton(onPressed: _addTask, child: const Text('Add Task')),
+          const SizedBox(height: 16),
+          const Text('Add refer app', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextField(controller: _referNameCtrl, decoration: const InputDecoration(labelText: 'App Name')),
+          TextField(controller: _referLinkCtrl, decoration: const InputDecoration(labelText: 'App Link')),
+          TextField(controller: _referCommissionCtrl, decoration: const InputDecoration(labelText: 'Commission Lulu coins')),
+          ElevatedButton(onPressed: _addReferApp, child: const Text('Add Refer App')),
           const SizedBox(height: 16),
           const Text('Pending withdrawals', style: TextStyle(fontWeight: FontWeight.bold)),
           StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
