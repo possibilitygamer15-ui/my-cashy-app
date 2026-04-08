@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/support_chat_message.dart';
 import '../services/support_chat_service.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../widgets/pro_action_button.dart';
 
 class SupportChatScreen extends StatefulWidget {
   const SupportChatScreen({super.key});
@@ -98,16 +99,15 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  FilledButton.icon(
-                    onPressed: _sending ? null : _send,
-                    icon: _sending
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.send),
-                    label: const Text('Send'),
+                  SizedBox(
+                    width: 110,
+                    child: ProActionButton(
+                      label: 'Send',
+                      icon: Icons.send,
+                      onPressed: _send,
+                      loading: _sending,
+                      expand: true,
+                    ),
                   ),
                 ],
               ),

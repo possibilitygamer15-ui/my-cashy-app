@@ -7,6 +7,7 @@ import '../models/task_item.dart';
 import '../services/ad_service.dart';
 import '../services/firestore_service.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../widgets/pro_action_button.dart';
 
 class EarnScreen extends StatefulWidget {
   const EarnScreen({super.key});
@@ -82,29 +83,43 @@ class _EarnScreenState extends State<EarnScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.16),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Text(
+              'Complete quick actions to earn coins faster. Rewards are credited instantly after verification.',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 12),
           Card(
             child: ListTile(
               title: const Text('Rewarded Ad (+20 coins)'),
               subtitle: const Text('Maximum 10 ads/day'),
-              trailing: ElevatedButton(onPressed: _watchAd, child: const Text('Watch')),
+              trailing: ProActionButton(label: 'Watch', icon: Icons.ondemand_video, onPressed: _watchAd),
             ),
           ),
+          const SizedBox(height: 8),
           Card(
             child: ListTile(
               title: const Text('Daily Spin Wheel'),
               subtitle: const Text('One spin daily (cost 10 coins), win 5-50 coins'),
-              trailing: ElevatedButton(onPressed: _spin, child: const Text('Spin')),
+              trailing: ProActionButton(label: 'Spin', icon: Icons.casino, onPressed: _spin),
             ),
           ),
+          const SizedBox(height: 8),
           Card(
             child: ListTile(
               title: const Text('Scratch Card'),
               subtitle: const Text('25% payout chance'),
-              trailing: ElevatedButton(onPressed: _scratch, child: const Text('Scratch')),
+              trailing: ProActionButton(label: 'Scratch', icon: Icons.style, onPressed: _scratch),
             ),
           ),
-          const SizedBox(height: 8),
-          Text('Tasks', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+          const SizedBox(height: 12),
+          Text('Tasks', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           StreamBuilder<List<TaskItem>>(
             stream: FirestoreService.instance.watchTasks(),
@@ -115,13 +130,17 @@ class _EarnScreenState extends State<EarnScreen> {
               }
               return Column(
                 children: tasks
-                    .map((task) => Card(
-                          child: ListTile(
-                            title: Text(task.title),
-                            subtitle: Text('Reward: ${task.rewardCoins} coins | 8 sec validation'),
-                            trailing: ElevatedButton(
-                              onPressed: () => unawaited(_startTask(task)),
-                              child: const Text('Start'),
+                    .map((task) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Card(
+                            child: ListTile(
+                              title: Text(task.title),
+                              subtitle: Text('Reward: ${task.rewardCoins} coins | 8 sec validation'),
+                              trailing: ProActionButton(
+                                label: 'Start',
+                                icon: Icons.play_arrow,
+                                onPressed: () => unawaited(_startTask(task)),
+                              ),
                             ),
                           ),
                         ))
@@ -133,4 +152,5 @@ class _EarnScreenState extends State<EarnScreen> {
       ),
     );
   }
+
 }

@@ -23,6 +23,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
     return Scaffold(
       body: screens[index],
       bottomNavigationBar: NavigationBar(
+        height: 72,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        animationDuration: const Duration(milliseconds: 180),
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
         destinations: const [
