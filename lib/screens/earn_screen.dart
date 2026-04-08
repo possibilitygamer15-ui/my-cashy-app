@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../models/refer_app_item.dart';
 import '../models/task_item.dart';
 import '../services/ad_service.dart';
 import '../services/firestore_service.dart';
@@ -71,6 +72,23 @@ class _EarnScreenState extends State<EarnScreen> {
     }
   }
 
+  Future<void> _startReferApp(ReferAppItem app) async {
+    final uri = Uri.parse(app.link);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      _show('Unable to open app link');
+      return;
+    }
+
+    _show('Install and keep app open for 8 seconds to claim commission...');
+    await Future<void>.delayed(const Duration(seconds: 8));
+    try {
+      await FirestoreService.instance.claimReferAppInstall(app);
+      _show('Refer commission credited: ${app.commissionCoins} Lulu coins');
+    } catch (e) {
+      _show(e.toString());
+    }
+  }
+
   void _show(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -117,6 +135,42 @@ class _EarnScreenState extends State<EarnScreen> {
               subtitle: const Text('25% payout chance'),
               trailing: ProActionButton(label: 'Scratch', icon: Icons.style, onPressed: _scratch),
             ),
+          ),
+          const SizedBox(height: 12),
+          Text('Refer Apps', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          StreamBuilder<List<ReferAppItem>>(
+            stream: FirestoreService.instance.watchReferApps(),
+            builder: (context, snapshot) {
+              final apps = snapshot.data ?? [];
+              if (apps.isEmpty) {
+                return const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('No refer apps available now'),
+                  ),
+                );
+              }
+
+              return Column(
+                children: apps
+                    .map((app) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Card(
+                            child: ListTile(
+                              title: Text(app.name),
+                              subtitle: Text('Install via link and earn ${app.commissionCoins} Lulu commission'),
+                              trailing: ProActionButton(
+                                label: 'Install',
+                                icon: Icons.download,
+                                onPressed: () => unawaited(_startReferApp(app)),
+                              ),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              );
+            },
           ),
           const SizedBox(height: 12),
           Text('Tasks', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),

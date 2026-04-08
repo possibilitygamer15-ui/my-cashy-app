@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/refer_app_item.dart';
 import '../models/task_item.dart';
 
 class FirestoreService {
@@ -24,6 +25,15 @@ class FirestoreService {
         .where('isActive', isEqualTo: true)
         .snapshots()
         .map((snap) => snap.docs.map((e) => TaskItem.fromMap(e.id, e.data())).toList());
+  }
+
+
+  Stream<List<ReferAppItem>> watchReferApps() {
+    return _db
+        .collection('referApps')
+        .where('isActive', isEqualTo: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((e) => ReferAppItem.fromMap(e.id, e.data())).toList());
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> watchTransactions() {
@@ -136,6 +146,34 @@ class FirestoreService {
       });
     });
     return reward;
+  }
+
+
+  Future<void> claimReferAppInstall(ReferAppItem app) async {
+    final proofRef = _db.collection('users').doc(_uid).collection('appReferrals').doc(app.id);
+
+    await _db.runTransaction((tx) async {
+      final proofSnap = await tx.get(proofRef);
+      if (proofSnap.exists) {
+        throw Exception('Commission already claimed for this app.');
+      }
+
+      tx.set(proofRef, {
+        'appId': app.id,
+        'claimedAt': DateTime.now().toIso8601String(),
+        'commissionCoins': app.commissionCoins,
+      });
+
+      tx.update(_userRef, {'coins': FieldValue.increment(app.commissionCoins)});
+      tx.set(_db.collection('transactions').doc(), {
+        'uid': _uid,
+        'type': 'coin_reward',
+        'amount': app.commissionCoins,
+        'description': 'Refer app commission: ${app.name}',
+        'status': 'success',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    });
   }
 
   Future<int> scratchReward() async {

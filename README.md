@@ -40,6 +40,10 @@ Professional Android earning app with OTP/Google login, rewarded ads, tasks, spi
   - uid, type, amount, description, status, timestamp
 - `withdrawals/{id}`
   - uid, amount, upiId, status, createdAt
+- `referApps/{id}`
+  - name, link, commissionCoins, isActive
+- `users/{uid}/appReferrals/{appId}`
+  - appId, commissionCoins, claimedAt
 
 ## 4) Security Rules (starter)
 
@@ -92,6 +96,7 @@ service cloud.firestore {
 - Referral rewards for both new and invited user.
 - Daily spin wheel (one spin/day) with 10 coin entry fee and 5–50 coin reward range.
 - Scratch card with 25% payout probability.
+- Refer app install commission claims (one claim per listed app).
 - Task validation timer (8 seconds) before reward claim.
 - Anti-abuse checks:
   - Daily ad cap
