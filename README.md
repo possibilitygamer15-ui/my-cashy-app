@@ -1,6 +1,6 @@
 # CashyPro (Flutter + Firebase)
 
-Professional Android earning app with OTP/Google login, rewarded ads, tasks, spin, scratch, wallet, withdrawals, referral, and admin panel.
+Professional Android earning app with OTP/Google login, rewarded ads, tasks, spin, scratch, wallet, withdrawals, referral, admin panel, and AI support chat.
 
 ## 1) Setup
 
@@ -113,3 +113,16 @@ flutter build appbundle --release
 ```
 
 Upload AAB to Play Console internal testing, then production rollout.
+
+
+## 8) AI Support Chat
+
+- New in-app support chat is available from the bottom navigation `Support` tab.
+- Chat history is stored in Firestore at `users/{uid}/supportChats/primary/messages`.
+- To enable Gemini responses, pass an API key at build/run time:
+
+```bash
+flutter run --dart-define=GEMINI_API_KEY=your_key_here
+```
+
+- If no API key is provided (or API call fails), the app falls back to built-in support responses for common issues (OTP, tasks, spin, withdrawals).

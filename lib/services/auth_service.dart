@@ -30,11 +30,15 @@ class AuthService {
         return AppAuthState(loggedIn: true, role: role);
       });
 
-  Future<void> sendOtp(String phone) async {
+  Future<void> sendOtp(String phone, {String name = 'Cashy User', String? referralCode}) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: phone,
       verificationCompleted: (credential) async {
-        await _auth.signInWithCredential(credential);
+        final result = await _auth.signInWithCredential(credential);
+        final user = result.user;
+        if (user != null) {
+          await _createOrUpdateUser(user, name: name, referralCode: referralCode);
+        }
       },
       verificationFailed: (e) => throw Exception(e.message),
       codeSent: (verificationId, _) {

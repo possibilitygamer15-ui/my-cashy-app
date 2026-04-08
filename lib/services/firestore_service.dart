@@ -74,12 +74,13 @@ class FirestoreService {
 
   Future<void> completeTask(TaskItem task) async {
     final proofRef = _db.collection('users').doc(_uid).collection('taskProofs').doc(task.id);
-    final proofSnap = await proofRef.get();
-    if (proofSnap.exists) {
-      throw Exception('Task already completed.');
-    }
 
     await _db.runTransaction((tx) async {
+      final proofSnap = await tx.get(proofRef);
+      if (proofSnap.exists) {
+        throw Exception('Task already completed.');
+      }
+
       tx.set(proofRef, {
         'taskId': task.id,
         'completedAt': DateTime.now().toIso8601String(),
@@ -98,19 +99,21 @@ class FirestoreService {
 
   Future<int> spinReward() async {
     final nowDate = DateTime.now().toIso8601String().split('T').first;
-    final user = await _userRef.get();
-    final userData = user.data() ?? {};
-    final last = (userData['lastSpinDate'] ?? '') as String;
-    if (last == nowDate) throw Exception('Daily spin already used.');
-
-    final coins = (userData['coins'] ?? 0) as int;
     const spinCost = 10;
-    if (coins < spinCost) {
-      throw Exception('Need at least $spinCost coins to spin.');
-    }
+    int reward = 0;
 
-    final reward = [5, 10, 15, 20, 25, 30, 50][Random().nextInt(7)];
     await _db.runTransaction((tx) async {
+      final userSnap = await tx.get(_userRef);
+      final userData = userSnap.data() ?? {};
+      final last = (userData['lastSpinDate'] ?? '') as String;
+      if (last == nowDate) throw Exception('Daily spin already used.');
+
+      final coins = (userData['coins'] ?? 0) as int;
+      if (coins < spinCost) {
+        throw Exception('Need at least $spinCost coins to spin.');
+      }
+
+      reward = [5, 10, 15, 20, 25, 30, 50][Random().nextInt(7)];
       tx.update(_userRef, {
         'lastSpinDate': nowDate,
         'coins': FieldValue.increment(reward - spinCost),

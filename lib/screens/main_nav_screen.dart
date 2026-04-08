@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'earn_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
+import 'support_chat_screen.dart';
 import 'wallet_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class MainNavScreen extends StatefulWidget {
 class _MainNavScreenState extends State<MainNavScreen> {
   int index = 0;
 
-  final screens = const [HomeScreen(), EarnScreen(), WalletScreen(), ProfileScreen()];
+  final screens = const [HomeScreen(), EarnScreen(), SupportChatScreen(), WalletScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.local_atm), label: 'Earn'),
+          NavigationDestination(icon: Icon(Icons.support_agent), label: 'Support'),
           NavigationDestination(icon: Icon(Icons.account_balance_wallet), label: 'Wallet'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
