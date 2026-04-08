@@ -1,0 +1,32 @@
+name: cashy_pro
+description: CashyPro - Professional Android earning app with Flutter + Firebase.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  firebase_core: ^3.13.0
+  firebase_auth: ^5.5.0
+  cloud_firestore: ^5.6.6
+  firebase_messaging: ^15.2.6
+  google_sign_in: ^6.3.0
+  google_mobile_ads: ^5.3.1
+  shared_preferences: ^2.5.3
+  intl: ^0.20.2
+  url_launcher: ^6.3.1
+  flutter_spinkit: ^5.2.1
+  uuid: ^4.5.1
+  confetti: ^0.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
