@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../services/firestore_service.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../widgets/lulu_coin_badge.dart';
 import '../widgets/pro_action_button.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -62,9 +63,12 @@ class _WalletScreenState extends State<WalletScreen> {
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   children: [
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Quick Withdraw', style: TextStyle(fontWeight: FontWeight.w700)),
+                    Row(
+                      children: const [
+                        LuluCoinBadge(size: 30),
+                        SizedBox(width: 8),
+                        Text('Quick Withdraw', style: TextStyle(fontWeight: FontWeight.w700)),
+                      ],
                     ),
                     const SizedBox(height: 10),
                     TextField(controller: _upiCtrl, decoration: const InputDecoration(labelText: 'UPI ID')),
@@ -75,7 +79,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       children: [
                         Expanded(
                           child: ProActionButton(
-                            label: 'Convert Coins',
+                            label: 'Convert Lulu',
                             icon: Icons.currency_exchange,
                             onPressed: _convert,
                             loading: _busyConvert,
@@ -97,7 +101,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     const SizedBox(height: 6),
                     const Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('100 coins = ₹10 • minimum withdrawal ₹50'),
+                      child: Text('150 Lulu coins = ₹10 • minimum withdrawal ₹50'),
                     ),
                   ],
                 ),

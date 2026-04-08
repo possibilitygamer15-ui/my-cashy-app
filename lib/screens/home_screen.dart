@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/firestore_service.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../widgets/lulu_coin_badge.dart';
 import '../widgets/stat_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -28,6 +29,18 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        const LuluCoinBadge(),
+                        const SizedBox(width: 10),
+                        Text('Lulu Coin',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                )),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                     Text('Welcome back, $name',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Colors.white,
@@ -42,7 +55,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              StatCard(title: 'Coins', value: '${data['coins'] ?? 0}', icon: Icons.monetization_on),
+              StatCard(title: 'Lulu Coins', value: '${data['coins'] ?? 0}', icon: Icons.monetization_on),
               StatCard(title: 'Balance', value: '₹${data['balance'] ?? 0}', icon: Icons.currency_rupee),
               StatCard(title: 'Referrals', value: '${data['referrals'] ?? 0}', icon: Icons.group),
             ],

@@ -30,7 +30,7 @@ class _EarnScreenState extends State<EarnScreen> {
       onError: _show,
       onReward: () {
         setState(() => scratchUnlocked = true);
-        _show('Ad reward credited + scratch unlocked');
+        _show('Lulu reward credited + scratch unlocked');
       },
     );
   }
@@ -38,7 +38,7 @@ class _EarnScreenState extends State<EarnScreen> {
   Future<void> _spin() async {
     try {
       final reward = await FirestoreService.instance.spinReward();
-      _show('You won $reward coins (10 coin spin fee applied)');
+      _show('You won $reward Lulu coins (10 coin spin fee applied)');
     } catch (e) {
       _show(e.toString());
     }
@@ -51,7 +51,7 @@ class _EarnScreenState extends State<EarnScreen> {
     }
     final reward = await FirestoreService.instance.scratchReward();
     setState(() => scratchUnlocked = false);
-    _show(reward > 0 ? 'Scratch reward: $reward coins' : 'Better luck next time');
+    _show(reward > 0 ? 'Scratch reward: $reward Lulu coins' : 'Better luck next time');
   }
 
   Future<void> _startTask(TaskItem task) async {
@@ -65,7 +65,7 @@ class _EarnScreenState extends State<EarnScreen> {
     try {
       await FirestoreService.instance.completeTask(task);
       setState(() => scratchUnlocked = true);
-      _show('Task completed. ${task.rewardCoins} coins added');
+      _show('Task completed. ${task.rewardCoins} Lulu coins added');
     } catch (e) {
       _show(e.toString());
     }
@@ -79,7 +79,7 @@ class _EarnScreenState extends State<EarnScreen> {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
-      appBar: AppBar(title: const Text('Earn Coins')),
+      appBar: AppBar(title: const Text('Earn Lulu Coins')),
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -90,14 +90,14 @@ class _EarnScreenState extends State<EarnScreen> {
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Text(
-              'Complete quick actions to earn coins faster. Rewards are credited instantly after verification.',
+              'Complete quick actions to earn Lulu coins faster. Rewards are credited instantly after verification.',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 12),
           Card(
             child: ListTile(
-              title: const Text('Rewarded Ad (+20 coins)'),
+              title: const Text('Rewarded Ad (+20 Lulu)'),
               subtitle: const Text('Maximum 10 ads/day'),
               trailing: ProActionButton(label: 'Watch', icon: Icons.ondemand_video, onPressed: _watchAd),
             ),
@@ -106,7 +106,7 @@ class _EarnScreenState extends State<EarnScreen> {
           Card(
             child: ListTile(
               title: const Text('Daily Spin Wheel'),
-              subtitle: const Text('One spin daily (cost 10 coins), win 5-50 coins'),
+              subtitle: const Text('One spin daily (cost 10 Lulu), win 5-50 Lulu'),
               trailing: ProActionButton(label: 'Spin', icon: Icons.casino, onPressed: _spin),
             ),
           ),
@@ -135,7 +135,7 @@ class _EarnScreenState extends State<EarnScreen> {
                           child: Card(
                             child: ListTile(
                               title: Text(task.title),
-                              subtitle: Text('Reward: ${task.rewardCoins} coins | 8 sec validation'),
+                              subtitle: Text('Reward: ${task.rewardCoins} Lulu | 8 sec validation'),
                               trailing: ProActionButton(
                                 label: 'Start',
                                 icon: Icons.play_arrow,

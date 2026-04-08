@@ -1,6 +1,6 @@
 # CashyPro (Flutter + Firebase)
 
-Professional Android earning app with OTP/Google login, rewarded ads, tasks, spin, scratch, wallet, withdrawals, referral, admin panel, and AI support chat.
+Professional Android earning app with OTP/Google login, rewarded ads, tasks, spin, scratch, wallet, withdrawals, referral, admin panel, and AI support chat. Default coin branding is **Lulu Coin** with a black buffalo-style coin badge.
 
 ## 1) Setup
 
@@ -98,7 +98,7 @@ service cloud.firestore {
   - One-time task completion
   - One spin/day
 - Wallet:
-  - 100 coins = ₹10 conversion
+  - 150 Lulu coins = ₹10 conversion
   - Withdrawal minimum ₹50
   - Pending/Approved/Rejected state
 - Admin:

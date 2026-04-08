@@ -38,11 +38,11 @@ class FirestoreService {
     await _db.runTransaction((tx) async {
       final snap = await tx.get(_userRef);
       final coins = (snap.data()?['coins'] ?? 0) as int;
-      if (coins < 100) {
-        throw Exception('Minimum 100 coins needed');
+      if (coins < 150) {
+        throw Exception('Minimum 150 Lulu coins needed');
       }
-      final convertCoins = (coins ~/ 100) * 100;
-      final amount = (convertCoins / 100) * 10;
+      final convertCoins = (coins ~/ 150) * 150;
+      final amount = (convertCoins / 150) * 10;
       tx.update(_userRef, {
         'coins': FieldValue.increment(-convertCoins),
         'balance': FieldValue.increment(amount),
@@ -51,7 +51,7 @@ class FirestoreService {
         'uid': _uid,
         'type': 'credit',
         'amount': amount,
-        'description': 'Coins converted to balance',
+        'description': 'Lulu coins converted to balance',
         'status': 'success',
         'timestamp': DateTime.now().toIso8601String(),
       });
